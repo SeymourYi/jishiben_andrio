@@ -27,17 +27,28 @@ import com.example.jishiben_andrio.data.Note
 import com.example.jishiben_andrio.ui.components.NoteItem
 import com.example.jishiben_andrio.viewmodel.NoteViewModel
 
+/**
+ * 笔记列表屏幕
+ * 
+ * 应用的主屏幕，展示所有保存的笔记列表
+ * 提供新建笔记和删除笔记的功能
+ * 
+ * @param viewModel 笔记视图模型，提供数据和操作方法
+ * @param onNavigateToEditor 导航到编辑器屏幕的回调函数
+ */
 @Composable
 fun NoteListScreen(
     viewModel: NoteViewModel,
     onNavigateToEditor: () -> Unit
 ) {
+    // 从ViewModel获取笔记列表并观察变化
     val notes by viewModel.notes.collectAsState()
+    // 记录当前待删除的笔记，用于显示确认对话框
     var noteToDelete by remember { mutableStateOf<Note?>(null) }
     
     Box(modifier = Modifier.fillMaxSize()) {
         if (notes.isEmpty()) {
-            // Show empty state
+            // 显示空状态提示
             Text(
                 text = "点击右下角的加号按钮创建笔记",
                 modifier = Modifier.align(Alignment.Center),
@@ -45,7 +56,7 @@ fun NoteListScreen(
                 color = MaterialTheme.colorScheme.outline
             )
         } else {
-            // Show notes list
+            // 显示笔记列表
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 100.dp, start = 8.dp, end = 8.dp, top = 8.dp)
@@ -54,18 +65,23 @@ fun NoteListScreen(
                     NoteItem(
                         note = note,
                         onNoteClick = { 
+                            // 点击笔记时，设置当前编辑的笔记并导航到编辑器
                             viewModel.setEditingNote(it)
                             onNavigateToEditor()
                         },
-                        onDeleteClick = { noteToDelete = note }
+                        onDeleteClick = { 
+                            // 点击删除按钮时，设置待删除的笔记，触发确认对话框
+                            noteToDelete = note 
+                        }
                     )
                 }
             }
         }
         
-        // Add button
+        // 添加新笔记的浮动按钮
         FloatingActionButton(
             onClick = {
+                // 清除当前编辑状态，准备创建新笔记
                 viewModel.clearEditingNote()
                 onNavigateToEditor()
             },
@@ -79,7 +95,8 @@ fun NoteListScreen(
             )
         }
         
-        // Delete confirmation dialog
+        // 删除确认对话框
+        // 只有当noteToDelete不为null时才显示
         noteToDelete?.let { note ->
             AlertDialog(
                 onDismissRequest = { noteToDelete = null },
@@ -88,6 +105,7 @@ fun NoteListScreen(
                 confirmButton = {
                     Button(
                         onClick = {
+                            // 确认删除
                             viewModel.deleteNote(note.id)
                             noteToDelete = null
                         }

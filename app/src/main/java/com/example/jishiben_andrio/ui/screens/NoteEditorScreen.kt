@@ -29,21 +29,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.jishiben_andrio.viewmodel.NoteViewModel
 
+/**
+ * 笔记编辑器屏幕
+ * 
+ * 用于创建新笔记或编辑现有笔记
+ * 包含标题和内容输入框，以及保存按钮
+ * 
+ * @param viewModel 笔记视图模型，提供数据和操作方法
+ * @param onNavigateBack 返回列表屏幕的回调函数
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditorScreen(
     viewModel: NoteViewModel,
     onNavigateBack: () -> Unit
 ) {
+    // 获取当前编辑的笔记
     val currentNote = viewModel.currentNote.value
+    // 使用本地状态跟踪标题和内容的变化
     var title by remember { mutableStateOf(currentNote.title) }
     var content by remember { mutableStateOf(currentNote.content) }
     
     Scaffold(
+        // 顶部应用栏
         topBar = {
             TopAppBar(
+                // 根据isEditing状态显示不同的标题
                 title = { Text(if (viewModel.isEditing.value) "编辑笔记" else "新建笔记") },
                 navigationIcon = {
+                    // 返回按钮
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -57,9 +71,11 @@ fun NoteEditorScreen(
                 )
             )
         },
+        // 浮动保存按钮
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
+                    // 保存笔记内容
                     viewModel.currentNote.value = currentNote.copy(
                         title = title,
                         content = content
@@ -76,13 +92,14 @@ fun NoteEditorScreen(
             }
         }
     ) { paddingValues ->
+        // 主内容区域
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            // Title field
+            // 标题输入框
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
@@ -96,7 +113,7 @@ fun NoteEditorScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Content field
+            // 内容输入框，占用剩余空间
             OutlinedTextField(
                 value = content,
                 onValueChange = { content = it },
